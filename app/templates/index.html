@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EV Finder</title>
+</head>
+<body>
+    <h1>Search Electric Vehicles by Brand</h1>
+    <form method="post">
+        <input type="text" name="brand" placeholder="Enter brand name" required>
+        <button type="submit">Search</button>
+    </form>
+
+    {% if brand %}
+        <h2>Results for "{{ brand }}":</h2>
+        {% if vehicles %}
+            <ul>
+                {% for v in vehicles %}
+                    <li><strong>{{ v.model }}</strong> - Battery: {{ v.battery_capacity }} kWh, Range: {{ v.range_km }} km, Seats: {{ v.seats }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No vehicles found.</p>
+        {% endif %}
+    {% endif %}
+</body>
+</html>
