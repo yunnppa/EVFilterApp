@@ -4,3 +4,5 @@ pytest
 flake8
 bandit
 safety
+setuptools>=78.1.1
+
