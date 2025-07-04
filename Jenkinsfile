@@ -32,7 +32,7 @@ pipeline {
             steps {
                 sh './$VENV_DIR/bin/pip install bandit safety'
                 sh './$VENV_DIR/bin/bandit -r app || true'
-                sh './$VENV_DIR/bin/safety check || true'
+                sh './$VENV_DIR/bin/safety scan || true'
             }
         }
 
