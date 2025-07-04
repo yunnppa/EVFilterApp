@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.11'
+        }
+    }
 
     stages {
         stage('Install Dependencies') {
@@ -7,29 +11,24 @@ pipeline {
                 sh 'pip install -r requirements.txt'
             }
         }
-
         stage('Lint') {
             steps {
-                sh 'flake8 src'
+                sh 'pip install flake8 && flake8 app'
             }
         }
-
         stage('Security (SAST & SCA)') {
             steps {
-                sh 'bandit -r src'
-                sh 'safety check'
+                sh 'pip install bandit safety && bandit -r app && safety check'
             }
         }
-
         stage('Test') {
             steps {
-                sh 'pytest tests'
+                sh 'pip install pytest && pytest tests'
             }
         }
-
-        stage('Run Application') {
+        stage('Run Flask App') {
             steps {
-                sh 'python src/main.py'
+                sh 'pip install -r requirements.txt && python run.py'
             }
         }
     }
