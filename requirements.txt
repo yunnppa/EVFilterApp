@@ -1,5 +1,6 @@
 Flask
 pandas
 pytest
+flake8
 bandit
 safety
