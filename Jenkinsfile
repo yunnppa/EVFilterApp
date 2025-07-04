@@ -2,50 +2,72 @@ pipeline {
     agent any
 
     environment {
-        VENV_DIR = 'venv'
+        VENV = "./venv"
+        PYTHON = "${VENV}/bin/python"
+        PIP = "${VENV}/bin/pip"
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Create Virtual Environment') {
             steps {
-                sh 'python3 -m venv $VENV_DIR'
+                sh 'python3 -m venv venv'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh './$VENV_DIR/bin/pip install --upgrade pip'
-                sh './$VENV_DIR/bin/pip install -r requirements.txt'
+                sh '''
+                    ${PIP} install --upgrade pip
+                    ${PIP} install -r requirements.txt
+                '''
             }
         }
 
         stage('Lint') {
-    steps {
-        sh '''
-            ./venv/bin/pip install flake8
-            ./venv/bin/flake8 app || true
-        '''
-    }
-}
+            steps {
+                sh '''
+                    ${PIP} install flake8
+                    ${VENV}/bin/flake8 app || true
+                '''
+            }
+        }
 
         stage('Security (SAST & SCA)') {
             steps {
-                sh './$VENV_DIR/bin/pip install bandit safety'
-                sh './$VENV_DIR/bin/bandit -r app || true'
-                sh './$VENV_DIR/bin/safety scan || true'
+                sh '''
+                    ${PIP} install bandit safety
+                    ${VENV}/bin/bandit -r app || true
+                    ${VENV}/bin/safety check --full-report || true
+                '''
             }
         }
 
         stage('Test') {
             steps {
-                sh './$VENV_DIR/bin/pip install pytest'
-                sh './$VENV_DIR/bin/pytest tests'
+                sh '''
+                    ${PIP} install pytest
+                    PYTHONPATH=$PWD ${VENV}/bin/pytest tests
+                '''
             }
         }
 
         stage('Run Flask App') {
+            when {
+                expression { currentBuild.currentResult == 'SUCCESS' }
+            }
             steps {
-                sh './$VENV_DIR/bin/python run.py'
+                sh '''
+                    echo "Running Flask App..."
+                    export FLASK_APP=app
+                    export FLASK_ENV=development
+                    ${VENV}/bin/flask run || true
+                '''
             }
         }
     }
