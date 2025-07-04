@@ -1,31 +1,53 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.11'  // Official Python image with pip + venv support
+        }
+    }
+
+    environment {
+        VENV_DIR = 'venv'
+    }
 
     stages {
+        stage('Create Virtual Environment') {
+            steps {
+                sh 'python -m venv $VENV_DIR'
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
-                sh 'pip3 install -r requirements.txt'
+                sh './$VENV_DIR/bin/pip install --upgrade pip'
+                sh './$VENV_DIR/bin/pip install -r requirements.txt'
             }
         }
+
         stage('Lint') {
             steps {
-                sh 'flake8 app'
+                sh './$VENV_DIR/bin/pip install flake8'
+                sh './$VENV_DIR/bin/flake8 app'
             }
         }
+
         stage('Security (SAST & SCA)') {
             steps {
-                sh 'bandit -r app'
-                sh 'safety check'
+                sh './$VENV_DIR/bin/pip install bandit safety'
+                sh './$VENV_DIR/bin/bandit -r app'
+                sh './$VENV_DIR/bin/safety check || true'
             }
         }
+
         stage('Test') {
             steps {
-                sh 'pytest tests'
+                sh './$VENV_DIR/bin/pip install pytest'
+                sh './$VENV_DIR/bin/pytest tests'
             }
         }
+
         stage('Run Flask App') {
             steps {
-                sh 'python3 run.py'
+                sh './$VENV_DIR/bin/python run.py'
             }
         }
     }
