@@ -1,6 +1,8 @@
 import pandas as pd
 from app.models import EV
 
+
+
 class EVFilter:
     def __init__(self, csv_path):
         self.df = pd.read_csv(csv_path)
