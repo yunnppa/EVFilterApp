@@ -1,5 +1,6 @@
 import pandas as pd
-from src.filter import EVFilter
+from app.filters import EVFilter
+
 
 def test_filter_by_brand():
     test_data = {
