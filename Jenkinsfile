@@ -7,13 +7,13 @@ pipeline {
         PIP = "${VENV}/bin/pip"
     }
 
-    stage('Clean Workspace') {
-        steps {
-            cleanWs()
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
         }
-    }
-   
-    stages {     
+
         stage('Checkout') {
             steps {
                 checkout scm
