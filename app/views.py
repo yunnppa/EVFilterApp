@@ -10,5 +10,5 @@ def index():
     brand = ""
     if request.method == "POST":
         brand = request.form.get("brand")
-        vehicles = ev_filter.filter_by_brand(brand)
+        vehicles = ev_filter.filters_by_brand(brand)
     return render_template("index.html", vehicles=vehicles, brand=brand)

@@ -13,7 +13,7 @@ def test_filters_by_brand():
     df.to_csv("data/test_ev_data.csv", index=False)
 
     ev_filter = EVFilter("data/test_ev_data.csv")
-    results = ev_filter.filter_by_brand("Tesla")
+    results = ev_filter.filters_by_brand("Tesla")
     assert len(results) == 2
     assert results[0].model == "Model S"
     assert results[1].range_km == 500
