@@ -69,10 +69,20 @@ pipeline {
             }
             steps {
                 sh '''
-                    echo "Running Flask App..."
+                    echo "Starting Flask App in background..."
                     export FLASK_APP=app
                     export FLASK_ENV=development
-                    ${VENV}/bin/flask run || true
+                    ${VENV}/bin/flask run > flask.log 2>&1 &
+                    FLASK_PID=$!
+                    echo "Flask is running with PID $FLASK_PID"
+
+                    # Optionally test the running app
+                    sleep 5
+                    curl --silent http://127.0.0.1:5000 || echo "Failed to reach Flask app."
+
+                    # Stop the Flask server after test
+                    kill $FLASK_PID
+                    echo "Flask server stopped."
                 '''
             }
         }
