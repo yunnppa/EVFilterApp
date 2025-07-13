@@ -8,6 +8,12 @@ pipeline {
     }
 
     stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -66,7 +72,19 @@ pipeline {
                     echo "Running Flask App..."
                     export FLASK_APP=app
                     export FLASK_ENV=development
-                    ${VENV}/bin/flask run || true
+
+                    # Run with explicit host binding
+                    ${VENV}/bin/flask run --host=0.0.0.0 --port=5000 > flask.log 2>&1 &
+                    FLASK_PID=$!
+
+                    # Wait for Flask to boot
+                    sleep 5
+
+                    echo "Testing Flask endpoint..."
+                    curl -s http://localhost:5000 || echo "Flask app did not respond"
+
+                    kill $FLASK_PID
+                    echo "Flask server stopped."
                 '''
             }
         }
